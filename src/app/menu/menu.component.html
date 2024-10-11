@@ -1,0 +1,23 @@
+<h2>เมนูเด็ดของทางร้าน</h2>
+<hr/>
+<div class="row">
+  <div class="col-3" *ngFor="let item of menuinList">
+    <a href="javascript:void(0)" class="text-black" style="text-decoration: none;">
+      <div class="card mt-4">
+        <div class="text-center">
+          <img
+            src="assets/images/user.jpg"
+            class="rounded"
+            style="width: 100px"
+          />
+        </div>
+        <hr>
+        <div class="card-body">
+          <div class="card-title h5">ชื่อเมนูอาหาร : {{ item["name"] }}</div>
+          <p class="card-text">หมวดหมู่อาหาร : {{ item["description"]}}</p>
+          <p class="card-text text-end text-success">ราคา : {{ item["price"] }} บาท</p>
+        </div>
+      </div>
+    </a>
+  </div>
+</div>

@@ -1,0 +1,512 @@
+<h2><i class="bi bi-calendar-check"></i> จัดการรายการจองโต๊ะ</h2>
+<hr />
+<div class="row">
+  <div class="col-3">
+    <div class="button d-grid">
+      <button type="button" class="btn btn-outline-secondary mx-4" (click)="isReservationPage()">
+        <i class="bi bi-clipboard2-data"></i> การจอง
+      </button>
+      <button type="button" class="btn btn-outline-secondary mx-4 my-4" (click)="isMenuPage()">
+        <i class="bi bi-book"></i> เมนูอาหาร
+      </button>
+    </div>
+  </div>
+  <div class="col-9" *ngIf="isReservation">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">ค้นหาการจอง</h5>
+        <form
+          [formGroup]="searchFormGroup"
+          (ngSubmit)="searchSubmit()"
+          class="needs-validation"
+          novalidate
+        >
+          <div class="row g-3">
+            <div class="col-sm-7">
+              <label for="searchName">ช้อมูลทั่วไป</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="searchName"
+                placeholder="ชื่อ หรือเบอร์โทร.ลูกค้า"
+                aria-label="ชื่อ หรือเบอร์โทร.ลูกค้า"
+              />
+            </div>
+            <div class="col-sm">
+              <label for="searchStartDate">วันที่จองไว้ (เริ่ม)</label>
+              <input
+                type="date"
+                class="form-control"
+                formControlName="searchStartDate"
+                placeholder="วันที่จองไว้ (เริ่ม)"
+                aria-label="วันที่จองไว้"
+              />
+            </div>
+            <div class="col-sm">
+              <label for="searchEndDate">วันที่จองไว้ (สิ้นสุด)</label>
+              <input
+                type="date"
+                class="form-control"
+                formControlName="searchEndDate"
+                placeholder="วันที่จองไว้ (สิ้นสุด)"
+                aria-label="วันที่จองไว้"
+              />
+            </div>
+          </div>
+          <button
+            class="btn btn-secondary mt-2"
+            type="submit"
+            [disabled]="
+              searchFormGroup.value['searchName'] != '' &&
+              searchFormGroup.value['searchStartDate'] != '' &&
+              searchFormGroup.value['searchEndDate'] != ''
+            "
+          >
+            <i class="bi bi-search"></i> ค้นหา
+          </button>
+        </form>
+      </div>
+    </div>
+    <div class="card mt-4">
+      <div class="card-body">
+        <h5 class="card-title">รายการการจอง</h5>
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="text-center">ID</th>
+              <th>ชื่อแขก (อีเมล์)</th>
+              <th>เบอร์โทร.</th>
+              <th>วันและเวลา</th>
+              <th class="text-end">จำนวนแขก</th>
+              <th class="text-center">การกระทำ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of reservatinList">
+              <td class="text-center">{{ item["id"] }}</td>
+              <td>{{ item["name"] }} ({{ item["email"] }})</td>
+              <td>{{ item["tel"] }}</td>
+              <td>
+                {{ item["reserve_date"] | date : "dd/MM/yyyy" }} at
+                {{ item["reserve_time"] | date : "shortTime" : "GMT+7" }}
+              </td>
+              <td class="text-end">{{ item["pax"] }}</td>
+              <td class="text-center">
+                <button
+                  class="btn btn-danger"
+                  (click)="deleteReservation(item['id'])"
+                >
+                  <i class="bi bi-trash"></i></button
+                >&nbsp;<button
+                  class="btn btn-secondary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editReservationModal"
+                  (click)="editReservation(item['id'])"
+                >
+                  <i class="bi bi-pen"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <div class="col-9" *ngIf="isMenu">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">ค้นหาเมนูอาหาร</h5>
+        <form
+          [formGroup]="searchFormGroup"
+          (ngSubmit)="searchSubmit()"
+          class="needs-validation"
+          novalidate
+        >
+          <div class="row g-3">
+            <div class="col-sm-7">
+              <label for="searchName">ชื่อเมนูอาหาร</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="searchName"
+                placeholder="ชื่อเมนูอาหาร"
+                aria-label="ชื่อเมนูอาหาร"
+              />
+            </div>
+            <div class="col-sm">
+              <button
+              class="btn btn-secondary mt-4"
+              type="submit"
+              [disabled]="
+                searchFormGroup.value['searchName'] != '' &&
+                searchFormGroup.value['searchStartDate'] != '' &&
+                searchFormGroup.value['searchEndDate'] != ''
+              "
+            >
+              <i class="bi bi-search"></i> ค้นหา
+            </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <div class="card mt-4">
+      <div class="card-body">
+        <div class="row d-flex align-items-center mb-4">
+          <div class="col-auto">
+            <h5>รายการเมนูอาหาร</h5>
+          </div>
+          <div class="col-auto ms-auto">
+            <button class="btn btn-secondary" type="submit" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <i class="bi bi-plus-circle"></i> เพิ่มเมนูอาหาร
+            </button>
+          </div>
+        </div>        
+        <table class="table table-striped table-hover">
+          <thead>
+            <tr>
+              <th class="text-center">ID</th>
+              <th>ชื่อเมนูอาหาร</th>
+              <th>ราคา</th>
+              <th>คำอธิบาย</th>
+              <th class="text-center">การกระทำ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of menuinList">
+              <td class="text-center">{{ item["id"] }}</td>
+              <td>{{ item["name"] }}</td>
+              <td>{{ item["price"] }}</td>
+              <td>
+                {{ item["description"]}}
+              </td>
+              <td class="text-center">
+                <button
+                  class="btn btn-danger"
+                  (click)="deleteMenu(item['id'])"
+                >
+                  <i class="bi bi-trash"></i></button
+                >&nbsp;<button
+                  class="btn btn-secondary"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editMenuModal"
+                  (click)="getMenuid(item['id'])"
+                >
+                  <i class="bi bi-pen"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Reservation Modal -->
+<div
+  class="modal fade"
+  id="editReservationModal"
+  tabindex="-1"
+  aria-labelledby="editReservationModal"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editReservationModal">
+          <i class="bi bi-table"></i> แก้ไขข้อมูลการจอง
+        </h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form
+          [formGroup]="editFormGroup"
+          (ngSubmit)="onSubmitEdit()"
+          class="needs-validation"
+          novalidate
+        >
+          <div class="mb-3">
+            <label for="name" class="form-label">ชื่อลูกค้า</label>
+            <input
+              id="name"
+              type="text"
+              formControlName="name"
+              class="form-control"
+              [ngClass]="{
+                'is-invalid':
+                  editFormGroup.get('name').invalid &&
+                  editFormGroup.get('name').touched
+              }"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="
+                editFormGroup.get('name').invalid &&
+                editFormGroup.get('name').touched
+              "
+            >
+              กรุณากรอกข้อมูลชื่อลูกค้า
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="email" class="form-label"
+              >อีเมล์สำหรับยืนยันการจอง</label
+            >
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="form-control"
+              [ngClass]="{
+                'is-invalid':
+                  editFormGroup.get('email').invalid &&
+                  editFormGroup.get('email').touched
+              }"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="
+                editFormGroup.get('email').invalid &&
+                editFormGroup.get('email').touched
+              "
+            >
+              กรุณากรอกข้อมูลอีเมล์ลูกค้า
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="phone" class="form-label">หมายเลขเบอร์โทรศัพท์</label>
+            <input
+              id="phone"
+              type="tel"
+              formControlName="phone"
+              class="form-control"
+              [ngClass]="{
+                'is-invalid':
+                  editFormGroup.get('phone').invalid &&
+                  editFormGroup.get('phone').touched
+              }"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="
+                editFormGroup.get('phone').invalid &&
+                editFormGroup.get('phone').touched
+              "
+            >
+              กรุณากรอกข้อมูลเบอร์โทรศัพท์
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="date" class="form-label">วันที่จอง</label>
+              <input
+                id="date"
+                type="date"
+                formControlName="date"
+                class="form-control"
+                [ngClass]="{
+                  'is-invalid':
+                    editFormGroup.get('date').invalid &&
+                    editFormGroup.get('date').touched
+                }"
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="
+                  editFormGroup.get('date').invalid &&
+                  editFormGroup.get('date').touched
+                "
+              >
+                กรุณากำหนดวันที่ต้องการจอง
+              </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+              <label for="time" class="form-label">เวลา</label>
+              <input
+                id="time"
+                type="time"
+                formControlName="time"
+                class="form-control"
+                [ngClass]="{
+                  'is-invalid':
+                    editFormGroup.get('time').invalid &&
+                    editFormGroup.get('time').touched
+                }"
+              />
+              <div
+                class="invalid-feedback"
+                *ngIf="
+                  editFormGroup.get('time').invalid &&
+                  editFormGroup.get('time').touched
+                "
+              >
+                กรุณากำหนดเวลาที่ต้องการจอง
+              </div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="guests" class="form-label">จำนวนแขก</label>
+            <input
+              id="guests"
+              type="number"
+              formControlName="guests"
+              class="form-control"
+              min="1"
+              [ngClass]="{
+                'is-invalid':
+                  editFormGroup.get('guests').invalid &&
+                  editFormGroup.get('guests').touched
+              }"
+            />
+            <div
+              class="invalid-feedback"
+              *ngIf="
+                editFormGroup.get('guests').invalid &&
+                editFormGroup.get('guests').touched
+              "
+            >
+              กรุณากรอกข้อมูลจำนวนลูกค้า (ไม่น้อยกว่า 1 ท่าน)
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="specialRequests" class="form-label"
+              >ความต้องการเฉพาะ</label
+            >
+            <textarea
+              id="specialRequests"
+              formControlName="specialRequests"
+              class="form-control"
+              rows="3"
+            ></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          ยกเลิก
+        </button>
+        <button type="button" class="btn btn-primary" (click)="onSubmitEdit()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Reservation Modal -->
+<div
+  class="modal fade"
+  id="editMenuModal"
+  tabindex="-1"
+  aria-labelledby="editMenuModal"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="editMenuModal">
+          <i class="bi bi-table"></i> แก้ไขข้อมูลเมนูอาหาร
+        </h1>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form #menuForm="ngForm" (ngSubmit)="updateMenu()">
+          <!-- Menu Name -->
+          <div class="mb-3">
+            <label for="name" class="form-label">ชื่อเมนูอาหาร</label>
+            <input type="text" class="form-control" id="name" placeholder="ชื่อเมนูอาหาร" name="name" [(ngModel)]="MenuInfo.name" required>
+          </div>
+      
+          <!-- Menu Price -->
+          <div class="mb-3">
+            <label for="price" class="form-label">ราคา</label>
+            <input type="number" min="1" class="form-control" id="price" placeholder="ราคา" name="price" [(ngModel)]="MenuInfo.price" required>
+          </div>
+      
+          <!-- Menu Description -->
+          <div class="mb-3">
+            <div class="dropdown">
+              <a class="btn btn-secondary dropdown-toggle" href="javascript:void(0)" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ MenuInfo.description || 'เลือกคำอธิบาย' }} <!-- Display selected or default text -->
+              </a>
+              
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="javascript:void(0)" (click)="setDescription('appetizer')">appetizer</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" (click)="setDescription('main')">main</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" (click)="setDescription('dessert')">dessert</a></li>
+              </ul>
+            </div>
+          </div>
+      
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+            <button type="Submit" class="btn btn-primary" [disabled]="!menuForm.form.valid">ยืนยัน</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal add menu -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">เพิ่มเมนูอาหาร</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form #menuForm="ngForm" (ngSubmit)="addMenu()">
+
+          <!-- Menu Name -->
+          <div class="mb-3">
+            <label for="name" class="form-label">ชื่อเมนูอาหาร</label>
+            <input type="text" class="form-control" id="name" placeholder="ชื่อเมนูอาหาร" name="name" [(ngModel)]="MenuInfo.name" required>
+          </div>
+      
+          <!-- Menu Price -->
+          <div class="mb-3">
+            <label for="price" class="form-label">ราคา</label>
+            <input type="number" min="1" class="form-control" id="price" placeholder="ราคา" name="price" [(ngModel)]="MenuInfo.price" required>
+          </div>
+      
+          <!-- Menu Description -->
+          <div class="mb-3">
+            <div class="dropdown">
+              <a class="btn btn-secondary dropdown-toggle" href="javascript:void(0)" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                {{ MenuInfo.description || 'เลือกคำอธิบาย' }} <!-- Display selected or default text -->
+              </a>
+              
+              <ul class="dropdown-menu">
+                <li><a class="dropdown-item" href="javascript:void(0)" (click)="setDescription('appetizer')">appetizer</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" (click)="setDescription('main')">main</a></li>
+                <li><a class="dropdown-item" href="javascript:void(0)" (click)="setDescription('dessert')">dessert</a></li>
+              </ul>
+            </div>
+          </div>
+      
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+            <button type="Submit" class="btn btn-primary" [disabled]="!menuForm.form.valid">ยืนยัน</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

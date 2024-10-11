@@ -1,0 +1,70 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <h2>ล็อกอินสำหรับผู้ดูแลระบบ</h2>
+      <form
+        [formGroup]="loginForm"
+        (ngSubmit)="login()"
+        class="needs-validation"
+        novalidate
+      >
+        <div class="form-group mb-3">
+          <label for="username">ชื่อผู้ใช้</label>
+          <input
+            type="text"
+            class="form-control"
+            id="username"
+            placeholder="ชื่อผู้ใช้"
+            formControlName="username"
+            [ngClass]="{
+              'is-invalid':
+                loginForm.get('username').invalid &&
+                loginForm.get('username').touched
+            }"
+          />
+          <div
+            class="invalid-feedback"
+            *ngIf="
+              loginForm.get('username').invalid &&
+              loginForm.get('username').touched
+            "
+          >
+            กรุณากรอกข้อมูลชื่อผู้ใช้ระบบ (อีเมล์)
+          </div>
+        </div>
+        <div class="form-group mb-3">
+          <label for="password" class="form-label">รหัสผ่าน</label>
+          <input
+            type="password"
+            class="form-control"
+            id="password"
+            placeholder="รหัสผ่าน"
+            formControlName="password"
+            [ngClass]="{
+              'is-invalid':
+                loginForm.get('password').invalid &&
+                loginForm.get('password').touched
+            }"
+          />
+
+          <div
+            class="invalid-feedback"
+            *ngIf="
+              loginForm.get('password').invalid &&
+              loginForm.get('password').touched
+            "
+          >
+            กรุณากรอกรหัสผ่าน
+          </div>
+        </div>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="loginForm.invalid"
+        >
+          เข้าสู่ระบบ
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
